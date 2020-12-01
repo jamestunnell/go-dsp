@@ -3,7 +3,6 @@ package fft
 import (
 	"fmt"
 	"math"
-	"math/cmplx"
 
 	"github.com/jamestunnell/go-dsp/transform"
 	"github.com/jamestunnell/go-dsp/util/complexslice"
@@ -65,34 +64,22 @@ func FFT(vals []complex128, scaling transform.Scaling) ([]complex128, error) {
 	return x, nil
 }
 
-// AnalyzeFloats perfoms FFT on the given float values and returns frequency content.
-// Before running the FFT, the float values will be padded with zeros to make radix-2 length.
-// Only the first half of the FFT results (positive frequencies) will be included in the
-// frequency content.
-func AnalyzeFloats(srate float64, floatVals []float64, scaling transform.Scaling) *freqresponse.FreqResponse {
+// Analyze runs transform.AnalyzeTimeFreqTransform with the FFT transform.
+// Before running the FFT, the float values will be converted to complex numbers and then
+// padded with zeros to make radix-2 length.
+func Analyze(
+	srate float64, floatVals []float64, scaling transform.Scaling) *freqresponse.FreqResponse {
 	input := complexslice.FromFloats(floatVals)
 	input, _ = EnsurePowerOfTwoSize(input)
 
-	output, _ := FFT(input, scaling)
-	size := len(output)
-	sizeHalf := size / 2
+	freqResp, err := transform.AnalyzeTimeFreqTransform(srate, input, FFT, scaling)
 
-	// calculate magnitude response of first half (second half is a mirror image)
-	mags := make([]float64, sizeHalf)
-	phases := make([]float64, sizeHalf)
-	freqs := make([]float64, sizeHalf)
-	binScale := srate / float64(size)
-
-	for i := 0; i < sizeHalf; i++ {
-		mags[i], phases[i] = cmplx.Polar(output[i])
-		freqs[i] = float64(i) * binScale
+	// We don't expect err
+	if err != nil {
+		panic(err)
 	}
 
-	return &freqresponse.FreqResponse{
-		Frequencies: freqs,
-		Magnitudes:  mags,
-		Phases:      phases,
-	}
+	return freqResp
 }
 
 // bitReversedOrder reorders the input values using bit reversed indices.

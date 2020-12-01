@@ -68,5 +68,5 @@ func (fir *FIR) Convolve(input []float64) ([]float64, error) {
 
 // FreqResponse calculates the filter frequency response.
 func (fir *FIR) FreqResponse(srate float64) *freqresponse.FreqResponse {
-	return fft.AnalyzeFloats(srate, fir.kernel, transform.NoScaling)
+	return fft.Analyze(srate, fir.kernel, transform.NoScaling)
 }
