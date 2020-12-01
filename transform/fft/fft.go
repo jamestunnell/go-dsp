@@ -5,29 +5,22 @@ import (
 	"math"
 	"math/cmplx"
 
+	"github.com/jamestunnell/go-dsp/transform"
 	"github.com/jamestunnell/go-dsp/util/complexslice"
 )
 
-type Scaling int
-
-const (
-	NoScaling Scaling = iota
-	ScaleByOneOverN
-	ScaleByOneOverSqrtN
-
-	twoPi = math.Pi * 2.0
-)
+const twoPi = math.Pi * 2.0
 
 // FFT is a radix-2 FFT transform using decimation-in-time.
 // Can be used for both forward (anaysis) and inverse (synthesis) transform
 // by selecting appropriate scaling.
 // Returns non-nil error if input size is not an exact power of two.
 // EnsurePowerOfTwoSize can be used before forward FFT to make power of two
-//  size by padding with zeros.
+// size by padding with zeros.
 // Ported from unlicensed MATLAB code which was posted to the MathWorks file
 // exchange by Dinesh Dileep Gaurav.
 // See http://www.mathworks.com/matlabcentral/fileexchange/17778.
-func FFT(vals []complex128, scaling Scaling) ([]complex128, error) {
+func FFT(vals []complex128, scaling transform.Scaling) ([]complex128, error) {
 	size := len(vals)
 	powerOfTwo := math.Log2(float64(size))
 
@@ -66,19 +59,7 @@ func FFT(vals []complex128, scaling Scaling) ([]complex128, error) {
 		}
 	}
 
-	scale := complex(1.0, 0.0)
-	switch scaling {
-	case NoScaling:
-		return x, nil
-	case ScaleByOneOverN:
-		scale = complex(1.0/float64(size), 0.0)
-	case ScaleByOneOverSqrtN:
-		scale = complex(1.0/math.Sqrt(float64(size)), 0.0)
-	}
-
-	for i := 0; i < size; i++ {
-		x[i] *= scale
-	}
+	transform.ScaleBy(x, scaling)
 
 	return x, nil
 }
@@ -87,7 +68,7 @@ func FFT(vals []complex128, scaling Scaling) ([]complex128, error) {
 // Before running the FFT, the float values will be padded with zeros to make radix-2 length.
 // Only the first half of the FFT results (positive frequencies) will be included in the
 // frequency content.
-func AnalyzeFloats(srate float64, floatVals []float64, scaling Scaling) *FreqContent {
+func AnalyzeFloats(srate float64, floatVals []float64, scaling transform.Scaling) *FreqContent {
 	input := complexslice.FromFloats(floatVals)
 	input, _ = EnsurePowerOfTwoSize(input)
 
