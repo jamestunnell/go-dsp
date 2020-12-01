@@ -15,7 +15,6 @@ func TestFFTWithShiftedImpulse(t *testing.T) {
 	testutil.TestTimeFreqTransformGivenShiftedImpulse(t, fft.FFT)
 }
 
-// TestFFTForwardReverse
 func TestFFTForwardReverse(t *testing.T) {
 	testutil.TestTimeFreqTransformForwardReverse(t, fft.FFT)
 }

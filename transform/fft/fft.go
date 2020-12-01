@@ -7,6 +7,7 @@ import (
 
 	"github.com/jamestunnell/go-dsp/transform"
 	"github.com/jamestunnell/go-dsp/util/complexslice"
+	"github.com/jamestunnell/go-dsp/util/freqresponse"
 )
 
 const twoPi = math.Pi * 2.0
@@ -68,7 +69,7 @@ func FFT(vals []complex128, scaling transform.Scaling) ([]complex128, error) {
 // Before running the FFT, the float values will be padded with zeros to make radix-2 length.
 // Only the first half of the FFT results (positive frequencies) will be included in the
 // frequency content.
-func AnalyzeFloats(srate float64, floatVals []float64, scaling transform.Scaling) *FreqContent {
+func AnalyzeFloats(srate float64, floatVals []float64, scaling transform.Scaling) *freqresponse.FreqResponse {
 	input := complexslice.FromFloats(floatVals)
 	input, _ = EnsurePowerOfTwoSize(input)
 
@@ -87,7 +88,7 @@ func AnalyzeFloats(srate float64, floatVals []float64, scaling transform.Scaling
 		freqs[i] = float64(i) * binScale
 	}
 
-	return &FreqContent{
+	return &freqresponse.FreqResponse{
 		Frequencies: freqs,
 		Magnitudes:  mags,
 		Phases:      phases,

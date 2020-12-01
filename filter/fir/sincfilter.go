@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/jamestunnell/go-dsp/transform/fft"
+	"github.com/jamestunnell/go-dsp/util/freqresponse"
 	"github.com/jamestunnell/go-dsp/window"
 )
 
@@ -95,11 +95,11 @@ func (f *SincFilter) Highpass(input []float64) ([]float64, error) {
 }
 
 // LowpassResponse returns the frequency response of the lowpass FIR.
-func (f *SincFilter) LowpassResponse() *fft.FreqContent {
+func (f *SincFilter) LowpassResponse() *freqresponse.FreqResponse {
 	return f.lowpassFIR.FreqResponse(f.srate)
 }
 
 // HighpassResponse returns the frequency response of the highpass FIR.
-func (f *SincFilter) HighpassResponse() *fft.FreqContent {
+func (f *SincFilter) HighpassResponse() *freqresponse.FreqResponse {
 	return f.highpassFIR.FreqResponse(f.srate)
 }

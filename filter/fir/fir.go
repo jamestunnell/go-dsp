@@ -3,7 +3,9 @@ package fir
 import (
 	"fmt"
 
+	"github.com/jamestunnell/go-dsp/transform"
 	"github.com/jamestunnell/go-dsp/transform/fft"
+	"github.com/jamestunnell/go-dsp/util/freqresponse"
 )
 
 // FIR (Finite Impulse Response) filter
@@ -20,6 +22,7 @@ func NewFIR(kernel []float64) *FIR {
 	}
 }
 
+// Order is the FIR order
 func (fir *FIR) Order() int {
 	return fir.order
 }
@@ -64,6 +67,6 @@ func (fir *FIR) Convolve(input []float64) ([]float64, error) {
 }
 
 // FreqResponse calculates the filter frequency response.
-func (fir *FIR) FreqResponse(srate float64) *fft.FreqContent {
-	return fft.AnalyzeFloats(srate, fir.kernel, fft.NoScaling)
+func (fir *FIR) FreqResponse(srate float64) *freqresponse.FreqResponse {
+	return fft.AnalyzeFloats(srate, fir.kernel, transform.NoScaling)
 }

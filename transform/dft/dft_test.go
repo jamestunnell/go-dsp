@@ -7,15 +7,14 @@ import (
 	"github.com/jamestunnell/go-dsp/transform/testutil"
 )
 
-func TestFFTWithImpulse(t *testing.T) {
+func TestDFTWithImpulse(t *testing.T) {
 	testutil.TestTimeFreqTransformGivenImpulse(t, dft.DFT)
 }
 
-func TestFFTWithShiftedImpulse(t *testing.T) {
+func TestDFTWithShiftedImpulse(t *testing.T) {
 	testutil.TestTimeFreqTransformGivenShiftedImpulse(t, dft.DFT)
 }
 
-// TestFFTForwardReverse
-func TestFFTForwardReverse(t *testing.T) {
+func TestDFTForwardReverse(t *testing.T) {
 	testutil.TestTimeFreqTransformForwardReverse(t, dft.DFT)
 }

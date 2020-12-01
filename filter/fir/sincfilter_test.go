@@ -16,25 +16,25 @@ func TestSincFilter(t *testing.T) {
 		return
 	}
 
-	freqContent := f.LowpassResponse()
+	freqResponse := f.LowpassResponse()
 
-	_, err = freqContent.MagnitudesDecibel()
+	_, err = freqResponse.MagnitudesDecibel()
 
 	assert.NoError(t, err)
 
 	// t.Log("Lowpass response")
-	// for i, freq := range freqContent.Frequencies {
+	// for i, freq := range freqResponse.Frequencies {
 	// 	t.Log(freq, mags[i])
 	// }
 
-	// freqContent = f.HighpassResponse()
+	// freqResponse = f.HighpassResponse()
 
-	// mags, err = freqContent.MagnitudesDecibel()
+	// mags, err = freqResponse.MagnitudesDecibel()
 
 	// assert.NoError(t, err)
 
 	// t.Log("Highpass response")
-	// for i, freq := range freqContent.Frequencies {
+	// for i, freq := range freqResponse.Frequencies {
 	// 	t.Log(freq, mags[i])
 	// }
 }

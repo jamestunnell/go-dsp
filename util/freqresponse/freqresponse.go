@@ -1,18 +1,18 @@
-package fft
+package freqresponse
 
 import (
 	"github.com/jamestunnell/go-dsp/util/gain"
 )
 
-// FreqContent stores frequency magnitude and phase data.
-type FreqContent struct {
+// FreqResponse contains frequency, magnitude, and phase.
+type FreqResponse struct {
 	Frequencies []float64
 	Magnitudes  []float64
 	Phases      []float64
 }
 
-// MagnitudesDecibel returns the magnitude response in decibels.
-func (fc *FreqContent) MagnitudesDecibel() ([]float64, error) {
+// MagnitudesDecibel returns the magnitude response in decibels (dB).
+func (fc *FreqResponse) MagnitudesDecibel() ([]float64, error) {
 	decibel := make([]float64, len(fc.Magnitudes))
 
 	for i, mag := range fc.Magnitudes {
