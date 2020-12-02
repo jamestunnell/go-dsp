@@ -7,12 +7,17 @@ import (
 // Highpass implements a "cookbook" Highpass filter using iir.Biquad,
 // based on the well-known RBJ biquad filter.
 type Highpass struct {
-	*commonHPLP
+	*lpBase
 }
 
 // NewHighpass makes a new cookbook Highpass filter.
-func NewHighpass(srate float64) *Highpass {
-	return &Highpass{newCommonHPLP(srate, calcHighpassParams)}
+func NewHighpass(srate float64) (*Highpass, error) {
+	base, err := newLPBase(srate, calcHighpassParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Highpass{base}, nil
 }
 
 func calcHighpassParams(cs, alpha float64) *iir.BiquadParams {

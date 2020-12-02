@@ -8,17 +8,32 @@ import (
 	"github.com/jamestunnell/go-dsp/filter/iir/cookbook"
 )
 
-func TestHighpass(t *testing.T) {
-	hp := cookbook.NewHighpass(10000.0)
+func TestHighpassBadSrate(t *testing.T) {
+	_, err := cookbook.NewHighpass(0.0)
 
-	err := hp.Configure(500.0)
+	assert.Error(t, err)
+
+	_, err = cookbook.NewHighpass(-50.0)
+
+	assert.Error(t, err)
+}
+
+func TestHighpassBadCutoff(t *testing.T) {
+	hp, err := cookbook.NewHighpass(1000.0)
+
 	assert.NoError(t, err)
 
-	// t.Log(gain.LinearToDecibel(hp.MagnitudeResponse(100.0)))
-	// t.Log(gain.LinearToDecibel(hp.MagnitudeResponse(250.0)))
-	// t.Log(gain.LinearToDecibel(hp.MagnitudeResponse(500.0)))
-	// t.Log(gain.LinearToDecibel(hp.MagnitudeResponse(1000.0)))
-	// t.Log(gain.LinearToDecibel(hp.MagnitudeResponse(2500.0)))
-	// t.Log(gain.LinearToDecibel(hp.MagnitudeResponse(4000.0)))
-	// t.Log(gain.LinearToDecibel(hp.MagnitudeResponse(4900.0)))
+	err = hp.Configure(501.0)
+
+	assert.Error(t, err)
+}
+
+func TestHighpassHappyPath(t *testing.T) {
+	hp, err := cookbook.NewHighpass(1000.0)
+
+	assert.NoError(t, err)
+
+	err = hp.Configure(250.0)
+
+	assert.NoError(t, err)
 }

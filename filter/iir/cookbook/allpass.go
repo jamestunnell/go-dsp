@@ -7,12 +7,17 @@ import (
 // Allpass implements a "cookbook" Allpass filter using iir.Biquad,
 // based on the well-known RBJ biquad filter.
 type Allpass struct {
-	*commonHPLP
+	*lpBase
 }
 
 // NewAllpass makes a new cookbook Allpass filter.
-func NewAllpass(srate float64) *Allpass {
-	return &Allpass{newCommonHPLP(srate, calcAllpassParams)}
+func NewAllpass(srate float64) (*Allpass, error) {
+	base, err := newLPBase(srate, calcAllpassParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Allpass{base}, nil
 }
 
 func calcAllpassParams(cs, alpha float64) *iir.BiquadParams {

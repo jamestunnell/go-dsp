@@ -1,11 +1,14 @@
 package iir
 
-import "math"
+import (
+	"fmt"
+	"math"
+
+	"github.com/jamestunnell/go-dsp/util/freqresponse"
+	"gonum.org/v1/plot"
+)
 
 const twoPi = math.Pi * 2.0
-
-// Ln2 is used in to calculate IIR filter coefficients
-var Ln2 = math.Log(2)
 
 type BiquadParams struct {
 	B0, B1, B2, A0, A1, A2 float64
@@ -21,14 +24,20 @@ type Biquad struct {
 	srate, criticalFreq, bandwidth float64
 }
 
-func NewBiquad(srate float64) *Biquad {
-	return &Biquad{
+func NewBiquad(srate float64) (*Biquad, error) {
+	if srate <= 0.0 {
+		return nil, fmt.Errorf("sample rate %f is not positive", srate)
+	}
+
+	bq := &Biquad{
 		srate:        srate,
 		params:       &BiquadParams{},
 		state:        &BiquadState{},
 		criticalFreq: 0.0,
 		bandwidth:    0.0,
 	}
+
+	return bq, nil
 }
 
 func (bq *Biquad) SampleRate() float64 {
@@ -77,10 +86,10 @@ func (bq *Biquad) ProcessSample(in float64) float64 {
 	return out
 }
 
-// Calculate the frequency magnitude response for the given frequency.
+// Magnitude calculates the magnitude response for the given frequency.
 // Method for determining freq magnitude response is from:
 // http://rs-met.com/documents/dsp/BasicDigitalFilters.pdf
-func (bq *Biquad) MagnitudeResponse(freq float64) float64 {
+func (bq *Biquad) Magnitude(freq float64) float64 {
 	omega := twoPi * freq / bq.srate
 	twoOmega := 2.0 * omega
 	b0, b1, b2 := bq.params.B0, bq.params.B1, bq.params.B2
@@ -88,4 +97,38 @@ func (bq *Biquad) MagnitudeResponse(freq float64) float64 {
 	b := (b0 * b0) + (b1 * b1) + (b2 * b2) + (2.0 * (b0*b1 + b1*b2) * math.Cos(omega)) + (2.0 * b0 * b2 * math.Cos(twoOmega))
 	a := (a0 * a0) + (a1 * a1) + (a2 * a2) + (2.0 * (a0*a1 + a1*a2) * math.Cos(omega)) + (2.0 * a0 * a2 * math.Cos(twoOmega))
 	return math.Sqrt(b / a)
+}
+
+// Magnitudes calculates the magnitude responses for the given frequencies.
+// Method for determining freq magnitude response is from:
+// http://rs-met.com/documents/dsp/BasicDigitalFilters.pdf
+func (bq *Biquad) Magnitudes(freqs []float64) []float64 {
+	n := len(freqs)
+	mags := make([]float64, n)
+
+	for i := 0; i < n; i++ {
+		mags[i] = bq.Magnitude(freqs[i])
+	}
+
+	return mags
+}
+
+// PlotMagnitude produces a plot with magnitude response for the given freqs.
+func (bq *Biquad) PlotMagnitude(freqs []float64) (*plot.Plot, error) {
+	freqResp := freqresponse.FreqResponse{
+		Frequencies: freqs,
+		Magnitudes:  bq.Magnitudes(freqs),
+	}
+
+	return freqResp.PlotMagnitude()
+}
+
+// PlotMagnitudeDecibel produces a plot with magnitude response (in dB) for the given freqs.
+func (bq *Biquad) PlotMagnitudeDecibel(freqs []float64) (*plot.Plot, error) {
+	freqResp := freqresponse.FreqResponse{
+		Frequencies: freqs,
+		Magnitudes:  bq.Magnitudes(freqs),
+	}
+
+	return freqResp.PlotMagnitudeDecibel()
 }
