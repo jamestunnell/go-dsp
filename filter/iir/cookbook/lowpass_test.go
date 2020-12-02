@@ -11,7 +11,7 @@ import (
 func TestLowpass(t *testing.T) {
 	lp := cookbook.NewLowpass(10000.0)
 
-	err := lp.Configure(250.0, 1.0)
+	err := lp.Configure(250.0)
 	assert.NoError(t, err)
 
 	// t.Log(gain.LinearToDecibel(lp.MagnitudeResponse(100.0)))
