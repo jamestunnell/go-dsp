@@ -1,7 +1,6 @@
 package gain
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -11,10 +10,11 @@ func DecibelToLinear(dB float64) float64 {
 }
 
 // LinearToDecibel converts linear gain to decibels.
-func LinearToDecibel(lin float64) (float64, error) {
+// Returns -Inf if input is not positive.
+func LinearToDecibel(lin float64) float64 {
 	if lin <= 0.0 {
-		return 0.0, fmt.Errorf("linear gain %f is not positive", lin)
+		return math.Inf(-1)
 	}
 
-	return 20.0 * math.Log10(lin), nil
+	return 20.0 * math.Log10(lin)
 }
