@@ -4,9 +4,7 @@ import (
 	"testing"
 
 	"github.com/jamestunnell/go-dsp/resample/discrete"
-	"github.com/jamestunnell/go-dsp/stats"
-	"github.com/jamestunnell/go-dsp/util/floatslice"
-	"github.com/jamestunnell/go-dsp/util/testsignal"
+	"github.com/jamestunnell/go-dsp/resample/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -51,44 +49,9 @@ func TestResampleSignalDownsample(t *testing.T) {
 }
 
 func testResampleSignal(t *testing.T, upsampleFactor, downsampleFactor int) {
-	const (
-		nSamplesBefore = 500
-	)
-
-	gen := &testsignal.Generator{
-		SampleRate: 1000.0,
-		Sines: []testsignal.Sine{
-			{Frequency: 80.0, Amplitude: 0.8, Phase: 0.3},
-			{Frequency: 160.0, Amplitude: 0.2, Phase: -1.1},
-		},
+	f := func(input []float64, srate float64) ([]float64, error) {
+		return discrete.Resample(input, srate, upsampleFactor, downsampleFactor, 30)
 	}
 
-	input, err := gen.Render(nSamplesBefore)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	actual, err := discrete.Resample(
-		input, gen.SampleRate, upsampleFactor, downsampleFactor, 30)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	// create the expected signal using the new upsampled rate
-	gen.SampleRate = gen.SampleRate * float64(upsampleFactor) / float64(downsampleFactor)
-	expected, err := gen.Render(nSamplesBefore * upsampleFactor / downsampleFactor)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	assert.NoError(t, err)
-	assert.Equal(t, len(actual), len(expected))
-
-	correlation, err := stats.CrossCorrelation(actual, expected, 20)
-	if !assert.NoError(t, err) {
-		return
-	}
-
-	maxCorrelation := floatslice.Max(correlation)
-	assert.InDelta(t, 1.0, maxCorrelation, 0.05)
+	testutil.TestResampledSignal(t, float64(upsampleFactor), downsampleFactor, f)
 }

@@ -3,11 +3,15 @@ package discrete
 import (
 	"fmt"
 
-	"github.com/jamestunnell/go-dsp/filter/fir"
-	"github.com/jamestunnell/go-dsp/util/floatslice"
-	"github.com/jamestunnell/go-dsp/window"
+	"github.com/jamestunnell/go-dsp/resample"
 )
 
+// Resample performs discrete upsampling followed by discrete downsampling.
+// The input size must be >= 4
+// The upsample factor must be >= 2.
+// The downsample factor must be >= 2.
+// The sample rate must be positive.
+// Returns non-nil error in case of failure.
 func Resample(
 	input []float64,
 	srate float64,
@@ -23,48 +27,11 @@ func Resample(
 		return []float64{}, fmt.Errorf("upsample factor %d is < 2", upsampleFactor)
 	}
 
-	if downsampleFactor < 2 {
-		return []float64{}, fmt.Errorf("downsample factor %d is < 2", downsampleFactor)
-	}
-
-	if srate <= 0.0 {
-		return []float64{}, fmt.Errorf("sample rate %f is not positive", srate)
-	}
-
 	upsampled := make([]float64, upsampleFactor*n)
 	for i := 0; i < n; i++ {
 		upsampled[i*upsampleFactor] = input[i] * float64(upsampleFactor)
 	}
 
-	numNeeded := len(upsampled) % downsampleFactor
-	if numNeeded != 0 {
-		zeros := make([]float64, numNeeded)
-		upsampled = append(upsampled, zeros...)
-	}
-
-	targetRate := srate * float64(upsampleFactor) / float64(downsampleFactor)
-
-	cutoff := 0.0
-	if targetRate < srate {
-		cutoff = targetRate / 2.0
-	} else {
-		cutoff = srate / 2.0
-	}
-
-	filter, err := fir.NewSincFilter(
-		srate*float64(upsampleFactor), cutoff, filterOrder, window.NewNuttall())
-	if err != nil {
-		return []float64{}, err
-	}
-
-	filtered, err := filter.Lowpass(upsampled)
-	if err != nil {
-		return []float64{}, err
-	}
-
-	output := floatslice.New(len(filtered)/downsampleFactor, func(idx int) float64 {
-		return filtered[idx*downsampleFactor]
-	})
-
-	return output, nil
+	return resample.Downsample(
+		upsampled, srate, float64(upsampleFactor), downsampleFactor, filterOrder)
 }
